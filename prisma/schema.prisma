@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Jogador {
+  id            Int      @id @default(autoincrement())
+  nome          String
+  idade         Int
+  posicao       String
+  nacionalidade String
+  times         JogadorTime[]
+}
+
+model Time {
+  id            Int        @id @default(autoincrement())
+  nome          String
+  anoFundacao   Int
+  pais          String
+  tecnico       String
+  jogadores     JogadorTime[]
+  partidasCasa  Partida[]  @relation("PartidaTimeCasa")
+  partidasFora  Partida[]  @relation("PartidaTimeVisitante")
+}
+
+model Partida {
+  id            Int    @id @default(autoincrement())
+  data          String
+  local         String
+  placar        String
+  timeCasaId    Int
+  timeCasa      Time   @relation("PartidaTimeCasa", fields: [timeCasaId], references: [id])
+  timeVisitanteId Int
+  timeVisitante Time   @relation("PartidaTimeVisitante", fields: [timeVisitanteId], references: [id])
+}
+
+model JogadorTime {
+  jogadorId Int
+  jogador   Jogador @relation(fields: [jogadorId], references: [id])
+  timeId    Int
+  time      Time    @relation(fields: [timeId], references: [id])
+  @@id([jogadorId, timeId])
+}
